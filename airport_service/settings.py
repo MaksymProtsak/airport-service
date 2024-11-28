@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     'user',
+    "airport",
     "drf_spectacular",
 ]
 
@@ -139,7 +140,7 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
-      "cinema.permissions.IsAdminOrIfAuthenticatedReadOnly",
+      "airport.permissions.IsAdminOrIfAuthenticatedReadOnly",
     ),
 
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
