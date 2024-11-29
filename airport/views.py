@@ -6,7 +6,7 @@ from airport.models import (
     Crew,
     AirplaneType,
 )
-from airport.serializer import (
+from airport.serializers import (
     CrewSerializer,
     AirplaneTypeSerializer,
 )
