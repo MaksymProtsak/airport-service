@@ -12,7 +12,7 @@ class Crew(models.Model):
 
 
 class AirplaneType(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=100)
 
 
 class Order(models.Model):
@@ -26,3 +26,34 @@ class Order(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class Airplane(models.Model):
+    name = models.CharField(max_length=100)
+    rows = models.IntegerField()
+    seats_in_row = models.IntegerField()
+    airplane_type = models.ForeignKey(AirplaneType, on_delete=models.CASCADE)
+
+
+class Airport(models.Model):
+    name = models.CharField(max_length=100)
+    closest_big_city = models.CharField(max_length=100)
+
+
+class Route(models.Model):
+    source = models.ForeignKey(Airport, on_delete=models.CASCADE)
+    destination = models.ForeignKey(Airport, on_delete=models.CASCADE)
+    distance = models.IntegerField()
+
+
+class Flight(models.Model):
+    route = models.ForeignKey(Route, on_delete=models.CASCADE)
+    airplane = models.ForeignKey(Airplane, on_delete=models.CASCADE)
+    departure_time = models.DateTimeField()
+    arrival_time = models.DateTimeField()
+
+
+class Ticker(models.Model):
+    row = models.IntegerField()
+    seat = models.IntegerField()
+    flight = models.ForeignKey(Flight, on_delete=models.CASCADE)
