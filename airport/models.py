@@ -41,9 +41,23 @@ class Airport(models.Model):
 
 
 class Route(models.Model):
-    source = models.ForeignKey(Airport, on_delete=models.CASCADE)
-    destination = models.ForeignKey(Airport, on_delete=models.CASCADE)
+    source = models.ForeignKey(
+        Airport,
+        on_delete=models.CASCADE,
+        related_name="departing_routes",
+    )
+    destination = models.ForeignKey(
+        Airport,
+        on_delete=models.CASCADE,
+        related_name="arriving_routes",
+    )
     distance = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.source} → {self.destination} ({self.distance} km)"
+
+    class Meta:
+        unique_together = ('source', 'destination')
 
 
 class Flight(models.Model):
