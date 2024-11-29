@@ -10,6 +10,9 @@ class Crew(models.Model):
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
 
+    def __str__(self):
+        return self.full_name
+
 
 class AirplaneType(models.Model):
     name = models.CharField(max_length=100)
@@ -67,7 +70,7 @@ class Flight(models.Model):
     arrival_time = models.DateTimeField()
 
 
-class Ticker(models.Model):
+class Ticket(models.Model):
     row = models.IntegerField()
     seat = models.IntegerField()
     flight = models.ForeignKey(Flight, on_delete=models.CASCADE)
