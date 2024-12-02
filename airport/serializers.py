@@ -61,6 +61,18 @@ class RouteSerializer(serializers.ModelSerializer):
 
 
 class FlightSerializer(serializers.ModelSerializer):
+    def validate(self, attrs):
+        data = super(FlightSerializer, self).validate(attrs=attrs)
+        error = Flight.validate_route(
+            attrs["route"],
+            attrs["airplane"],
+            attrs["departure_time"],
+            attrs["arrival_time"],
+        )
+        if error:
+            raise ValidationError(error)
+        return data
+
     class Meta:
         model = Flight
         fields = ("id", "route", "airplane", "departure_time", "arrival_time")
