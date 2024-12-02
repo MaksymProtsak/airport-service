@@ -112,6 +112,7 @@ class Flight(models.Model):
             arrival_time
     ):
         errors = {}
+        breakpoint()
         if Flight.objects.filter(
                 route=route,
                 airplane=airplane,
@@ -152,3 +153,31 @@ class Ticket(models.Model):
     row = models.IntegerField()
     seat = models.IntegerField()
     flight = models.ForeignKey(Flight, on_delete=models.CASCADE)
+
+    @staticmethod
+    def validate_ticket(row, seat, flight): # Finish validation method
+        errors = {}
+        if Ticket.objects.filter(
+                row=row,
+                seat=seat,
+                flight=flight,
+        ):
+            errors["route_exist"] = (
+                f"The place 'seat: {seat}, row: {row}' "
+                f"with flight '{flight}' already bought."
+            )
+        return errors
+
+    def clean(self):
+        Ticket.validate_ticket(
+            self.row,
+            self.seat,
+            self.flight,
+        )
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.flight}, row: {self.row}, seat: {self.seat}."
