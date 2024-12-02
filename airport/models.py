@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 
 class Crew(models.Model):
@@ -16,6 +17,9 @@ class Crew(models.Model):
 
 class AirplaneType(models.Model):
     name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
 
 
 class Order(models.Model):
@@ -42,6 +46,9 @@ class Airport(models.Model):
     name = models.CharField(max_length=100)
     closest_big_city = models.CharField(max_length=100)
 
+    def __str__(self):
+        return f"{self.name}"
+
 
 class Route(models.Model):
     source = models.ForeignKey(
@@ -58,6 +65,28 @@ class Route(models.Model):
 
     def __str__(self):
         return f"{self.source} → {self.destination} ({self.distance} km)"
+
+    @staticmethod
+    def validate_route(destination, distance, source, error_to_raise):
+        if Route.objects.filter(
+                destination=destination,
+                distance=distance
+        ).exists():
+            raise ValidationError("The route already exist.")
+        elif destination == source:
+            raise error_to_raise("The destination and source are equal.")
+
+    def clean(self):
+        Route.validate_route(
+            self.destination,
+            self.distance,
+            self.source,
+            ValidationError
+        )
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     class Meta:
         unique_together = ('source', 'destination')
