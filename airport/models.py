@@ -67,14 +67,18 @@ class Route(models.Model):
         return f"{self.source} → {self.destination} ({self.distance} km)"
 
     @staticmethod
-    def validate_route(destination, distance, source, error_to_raise):
+    def validate_route(destination, distance, source):
+        errors = {}
         if Route.objects.filter(
                 destination=destination,
                 distance=distance
         ).exists():
-            raise ValidationError("The route already exist.")
+            errors["route_exist"] = "The route already exist."
+            return errors["route_exist"]
         elif destination == source:
-            raise error_to_raise("The destination and source are equal.")
+            errors["destination_equal"] = "The destination and source are equal."
+            return errors["destination_equal"]
+        return errors
 
     def clean(self):
         Route.validate_route(
