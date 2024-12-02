@@ -105,16 +105,35 @@ class Flight(models.Model):
     arrival_time = models.DateTimeField()
 
     @staticmethod
-    def validate_route(route, airplane, departure_time, arrival_time):
+    def validate_route(
+            route,
+            airplane,
+            departure_time,
+            arrival_time
+    ):
         errors = {}
         if Flight.objects.filter(
                 route=route,
+                airplane=airplane,
+                departure_time=departure_time,
+                arrival_time=arrival_time,
         ):
-            errors["route_exist"] = f"Flight with route '{route}' already exist."
+            errors["route_exist"] = (
+                f"Flight with route '{route}'already exist."
+            )
+        elif departure_time == arrival_time:
+            errors["departure_time"] = (
+                "The departure time and arrival time cannot be same."
+            )
         return errors
 
     def __str__(self):
-        return f"{self.route}, {self.airplane}, {self.departure_time}, {self.arrival_time}."
+        return (
+            f"{self.route}, "
+            f"{self.airplane}, "
+            f"{self.departure_time}, "
+            f"{self.arrival_time}."
+        )
 
     def clean(self):
         Flight.validate_route(
