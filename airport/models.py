@@ -104,10 +104,29 @@ class Flight(models.Model):
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
 
-    # NEED TO ADD validate_flight method
+    @staticmethod
+    def validate_route(route, airplane, departure_time, arrival_time):
+        errors = {}
+        if Flight.objects.filter(
+                route=route,
+        ):
+            errors["route_exist"] = f"Flight with route '{route}' already exist."
+        return errors
 
     def __str__(self):
         return f"{self.route}, {self.airplane}, {self.departure_time}, {self.arrival_time}."
+
+    def clean(self):
+        Flight.validate_route(
+            self.route,
+            self.airplane,
+            self.departure_time,
+            self.arrival_time,
+        )
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
 
 class Ticket(models.Model):
