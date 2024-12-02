@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-from django.core.exceptions import ValidationError
 
 
 class Crew(models.Model):
@@ -112,7 +111,6 @@ class Flight(models.Model):
             arrival_time
     ):
         errors = {}
-        breakpoint()
         if Flight.objects.filter(
                 route=route,
                 airplane=airplane,
