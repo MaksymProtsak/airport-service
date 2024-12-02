@@ -41,6 +41,9 @@ class Airplane(models.Model):
     seats_in_row = models.IntegerField()
     airplane_type = models.ForeignKey(AirplaneType, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.name
+
 
 class Airport(models.Model):
     name = models.CharField(max_length=100)
@@ -100,6 +103,8 @@ class Flight(models.Model):
     airplane = models.ForeignKey(Airplane, on_delete=models.CASCADE)
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
+
+    # NEED TO ADD validate_flight method
 
 
 class Ticket(models.Model):
