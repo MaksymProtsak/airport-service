@@ -85,7 +85,6 @@ class Route(models.Model):
             self.destination,
             self.distance,
             self.source,
-            ValidationError
         )
 
     def save(self, *args, **kwargs):
