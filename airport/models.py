@@ -106,6 +106,9 @@ class Flight(models.Model):
 
     # NEED TO ADD validate_flight method
 
+    def __str__(self):
+        return f"{self.route}, {self.airplane}, {self.departure_time}, {self.arrival_time}."
+
 
 class Ticket(models.Model):
     row = models.IntegerField()
