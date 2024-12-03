@@ -153,9 +153,8 @@ class Ticket(models.Model):
     flight = models.ForeignKey(Flight, on_delete=models.CASCADE)
 
     @staticmethod
-    def validate_ticket(row, seat, flight): # Finish validation method
+    def validate_ticket(row, seat, flight):
         errors = {}
-        breakpoint()
         if Ticket.objects.filter(
                 row=row,
                 seat=seat,
@@ -170,7 +169,7 @@ class Ticket(models.Model):
                 f"The row can be in range "
                 f"from 1 to {flight.airplane.rows} not {row}."
             )
-        elif seat < 1 or row > flight.airplane.seats_in_row:
+        elif seat < 1 or seat > flight.airplane.seats_in_row:
             errors["row_not_exist"] = (
                 f"The seat can be in range "
                 f"from 1 to {flight.airplane.seats_in_row} not {seat}."
