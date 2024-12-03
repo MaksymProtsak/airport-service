@@ -66,6 +66,9 @@ class OrderViewSet(
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
     def list(self, request, *args, **kwargs):
         """Retrieve list of orders"""
         return super().list(request, *args, **kwargs)
@@ -140,21 +143,4 @@ class FlightViewSet(
 
     def create(self, request, *args, **kwargs):
         """Create a new flight"""
-        return super().create(request, *args, **kwargs)
-
-
-class TicketViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    GenericViewSet,
-):
-    queryset = Ticket.objects.all()
-    serializer_class = TicketSerializer
-
-    def list(self, request, *args, **kwargs):
-        """Retrieve list of tickets"""
-        return super().list(request, *args, **kwargs)
-
-    def create(self, request, *args, **kwargs):
-        """Create a new ticket"""
         return super().create(request, *args, **kwargs)
