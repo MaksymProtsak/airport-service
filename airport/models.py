@@ -155,6 +155,7 @@ class Ticket(models.Model):
     @staticmethod
     def validate_ticket(row, seat, flight): # Finish validation method
         errors = {}
+        breakpoint()
         if Ticket.objects.filter(
                 row=row,
                 seat=seat,
@@ -163,6 +164,16 @@ class Ticket(models.Model):
             errors["route_exist"] = (
                 f"The place 'seat: {seat}, row: {row}' "
                 f"with flight '{flight}' already bought."
+            )
+        elif row < 1 or row > flight.airplane.rows:
+            errors["row_not_exist"] = (
+                f"The row can be in range "
+                f"from 1 to {flight.airplane.rows} not {row}."
+            )
+        elif seat < 1 or row > flight.airplane.seats_in_row:
+            errors["row_not_exist"] = (
+                f"The seat can be in range "
+                f"from 1 to {flight.airplane.seats_in_row} not {seat}."
             )
         return errors
 
