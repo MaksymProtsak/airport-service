@@ -63,7 +63,11 @@ class OrderViewSet(
     mixins.ListModelMixin,
     GenericViewSet,
 ):
-    queryset = Order.objects.all()
+    queryset = (
+        Order.objects.all().
+        select_related("user").
+        prefetch_related("tickets__flight")
+    )
     serializer_class = OrderSerializer
 
     def perform_create(self, serializer):
