@@ -6,6 +6,7 @@ click==8.1.7
 colorama==0.4.6
 dict2xml==1.7.5
 Django==4.1
+django-debug-toolbar==3.4.0
 djangorestframework==3.13.1
 djangorestframework-simplejwt==5.2.0
 drf-spectacular==0.22.1
