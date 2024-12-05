@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "airport",
     "debug_toolbar",
     "drf_spectacular",
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
