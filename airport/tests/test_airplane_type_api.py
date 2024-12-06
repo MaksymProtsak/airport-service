@@ -11,9 +11,9 @@ from airport.serializers import AirplaneTypeSerializer
 AIRPLANE_TYPES_URL = reverse("airport:airplanetype-list")
 
 
-def sample_airplane(**params) -> AirplaneType:
+def sample_airplane_type(**params) -> AirplaneType:
     defaults = {
-        "name": "Boeing 747",
+        "name": "Cargo",
     }
     defaults.update(params)
     return AirplaneType.objects.create(**defaults)
@@ -38,7 +38,7 @@ class AuthenticatedAirplaneTypeApiTests(TestCase):
         self.client.force_authenticate(self.user)
 
     def test_airplane_type_list(self):
-        sample_airplane()
+        sample_airplane_type()
         airplane_type = AirplaneType.objects.all()
         serializer = AirplaneTypeSerializer(airplane_type, many=True)
         res = self.client.get(AIRPLANE_TYPES_URL)
@@ -47,7 +47,7 @@ class AuthenticatedAirplaneTypeApiTests(TestCase):
 
     def test_create_airplane_type_forbidden(self):
         payload = {
-            "name": "Boeing 777",
+            "name": "Cargo",
         }
         res = self.client.post(path=AIRPLANE_TYPES_URL, data=payload)
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
@@ -64,4 +64,8 @@ class AdminCrewTests(TestCase):
         self.client.force_authenticate(self.user)
 
     def test_create_airplane_type(self):
-        ...
+        payload = {"name": "Cargo"}
+        res = self.client.post(path=AIRPLANE_TYPES_URL, data=payload)
+        airplane_type = AirplaneType.objects.get(id=res.data["id"])
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.data["name"], airplane_type.name)
