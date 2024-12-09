@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from django.utils.datetime_safe import datetime
+from datetime import datetime, timezone
 
 from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
@@ -9,7 +9,7 @@ from rest_framework import status
 from airport.models import Route, Flight
 from airport.serializers import FlightSerializer
 from airport.tests.test_airplane_api import sample_airplane
-from airport.tests.test_route_api import sample_airports, sample_route
+from airport.tests.test_route_api import sample_route
 
 FLIGHT_URL = reverse("airport:flight-list")
 
@@ -55,7 +55,7 @@ class AuthenticatedFlightApiTests(TestCase):
     def test_create_flight_forbidden(self):
         route = sample_route()
         airplane = sample_airplane()
-        departure_time = datetime(2024, 6, 1, 13, 15),
+        departure_time = datetime(2024, 6, 1, 13, 15, ),
         arrival_time = datetime(2024, 6, 1, 14, 30)
         payload = {
             "route": route.id,
@@ -80,13 +80,28 @@ class AdminFlightTests(TestCase):
     def test_create_flight(self):
         route = sample_route()
         airplane = sample_airplane()
-        departure_time = datetime(2024, 6, 1, 13, 15),
-        arrival_time = datetime(2024, 6, 1, 14, 30)
+        departure_time = datetime(
+            2024,
+            6,
+            1,
+            13,
+            15,
+            tzinfo=timezone.utc
+        )
+        arrival_time = datetime(
+            2024,
+            6,
+            1,
+            14,
+            30,
+            tzinfo=timezone.utc
+        )
+
         payload = {
             "route": route.id,
             "airplane": airplane.id,
             "departure_time": departure_time,
-            "arrival_time": arrival_time
+            "arrival_time": arrival_time,
         }
         res = self.client.post(path=FLIGHT_URL, data=payload)
         flight = Flight.objects.get(id=res.data["id"])
@@ -97,40 +112,41 @@ class AdminFlightTests(TestCase):
         self.assertEqual(flight.departure_time, payload["departure_time"])
         self.assertEqual(flight.arrival_time, payload["arrival_time"])
 
-    # def test_create_route_already_exist(self):
-    #     source, destination = sample_airports()
-    #     payload = {
-    #         "source": source.id,
-    #         "destination": destination.id,
-    #         "distance": 400,
-    #     }
-    #     res = self.client.post(path=ROUTE_URL, data=payload)
-    #     self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-    #     res = self.client.post(path=ROUTE_URL, data=payload)
-    #     self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-    #     self.assertEqual(
-    #         res.data["non_field_errors"][0].title(),
-    #         "The Fields Source, Destination Must Make A Unique Set."
-    #     )
-    #     self.assertEqual(
-    #         res.data["non_field_errors"][0].code,
-    #         "unique"
-    #     )
-    #
-    # def test_create_route_destination_adn_source_equal(self):
-    #     source, destination = sample_airports()
-    #     payload = {
-    #                 "source": source.id,
-    #                 "destination": source.id,
-    #                 "distance": 400,
-    #     }
-    #     res = self.client.post(path=ROUTE_URL, data=payload)
-    #     self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-    #     self.assertEqual(
-    #         res.data["non_field_errors"][0].title(),
-    #         "The destination and source are equal."
-    #     )
-    #     self.assertEqual(
-    #         res.data["non_field_errors"][0].code,
-    #         "invalid"
-    #     )
+    def test_create_flight_already_exist(self):
+        s_flight = sample_flight()
+        payload = {
+            "route": s_flight.route.id,
+            "airplane": s_flight.airplane.id,
+            "departure_time": s_flight.departure_time,
+            "arrival_time": s_flight.arrival_time,
+        }
+        res = self.client.post(path=FLIGHT_URL, data=payload)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            res.data["flight_exist"][0].title().lower(),
+            f"Flight with route '{Route.objects.get(id=payload["route"])}'"
+            f"already exist.".lower()
+        )
+        self.assertEqual(
+            res.data["flight_exist"][0].code,
+            "invalid"
+        )
+
+    def test_create_flight_with_same_departure_and_arrival_time(self):
+        s_flight = sample_flight()
+        payload = {
+            "route": s_flight.route.id,
+            "airplane": s_flight.airplane.id,
+            "departure_time": s_flight.departure_time,
+            "arrival_time": s_flight.departure_time,
+        }
+        res = self.client.post(path=FLIGHT_URL, data=payload)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            res.data["departure_time"][0].title().lower(),
+            "The departure time and arrival time cannot be same.".lower()
+        )
+        self.assertEqual(
+            res.data["departure_time"][0].code,
+            "invalid"
+        )
