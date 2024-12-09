@@ -117,7 +117,7 @@ class Flight(models.Model):
                 departure_time=departure_time,
                 arrival_time=arrival_time,
         ):
-            errors["route_exist"] = (
+            errors["flight_exist"] = (
                 f"Flight with route '{route}'already exist."
             )
         elif departure_time == arrival_time:
