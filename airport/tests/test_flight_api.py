@@ -77,21 +77,26 @@ class AdminFlightTests(TestCase):
         )
         self.client.force_authenticate(self.user)
 
-    # def test_create_route(self):
-    #     source, destination = sample_airports()
-    #     payload = {
-    #         "source": source.id,
-    #         "destination": destination.id,
-    #         "distance": 400,
-    #     }
-    #     res = self.client.post(path=ROUTE_URL, data=payload)
-    #     route = Route.objects.get(id=res.data["id"])
-    #
-    #     self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-    #     self.assertEqual(route.source.id, payload["source"])
-    #     self.assertEqual(route.destination.id, payload["destination"])
-    #     self.assertEqual(route.distance, payload["distance"])
-    #
+    def test_create_flight(self):
+        route = sample_route()
+        airplane = sample_airplane()
+        departure_time = datetime(2024, 6, 1, 13, 15),
+        arrival_time = datetime(2024, 6, 1, 14, 30)
+        payload = {
+            "route": route.id,
+            "airplane": airplane.id,
+            "departure_time": departure_time,
+            "arrival_time": arrival_time
+        }
+        res = self.client.post(path=FLIGHT_URL, data=payload)
+        flight = Flight.objects.get(id=res.data["id"])
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(flight.route.id, payload["route"])
+        self.assertEqual(flight.airplane.id, payload["airplane"])
+        self.assertEqual(flight.departure_time, payload["departure_time"])
+        self.assertEqual(flight.arrival_time, payload["arrival_time"])
+
     # def test_create_route_already_exist(self):
     #     source, destination = sample_airports()
     #     payload = {
