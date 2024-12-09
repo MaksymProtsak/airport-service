@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
@@ -11,7 +13,7 @@ from airport.serializers import RouteSerializer
 ROUTE_URL = reverse("airport:route-list")
 
 
-def sample_route(**params) -> Route:
+def sample_airports() -> Tuple:
     source = Airport.objects.create(
         name="IEV",
         closest_big_city="Kyiv"
@@ -20,6 +22,11 @@ def sample_route(**params) -> Route:
         name="NLV",
         closest_big_city="Mykolaiv",
     )
+    return source, destination
+
+
+def sample_route(**params) -> Route:
+    source, destination = sample_airports()
     defaults = {
         "source": source,
         "destination": destination,
@@ -83,25 +90,55 @@ class AdminRouteTests(TestCase):
         )
         self.client.force_authenticate(self.user)
 
-#     def test_create_airplane(self):
-#         airplane_type = AirplaneType.objects.create(name="Passenger")
-#         Airplane.objects.create(
-#             name="Boeing 737",
-#             rows=30,
-#             seats_in_row=6,
-#             airplane_type=airplane_type,
-#         )
-#         payload = {
-#             "name": "Boeing 737",
-#             "rows": 30,
-#             "seats_in_row": 6,
-#             "airplane_type": 1,
-#         }
-#         res = self.client.post(path=AIRPLANE_URL, data=payload)
-#         airplane = Airplane.objects.get(id=res.data["id"])
-#
-#         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-#         self.assertEqual(airplane.name, payload["name"])
-#         self.assertEqual(airplane.rows, payload["rows"])
-#         self.assertEqual(airplane.seats_in_row, payload["seats_in_row"])
-#         self.assertEqual(airplane.airplane_type.id, payload["airplane_type"])
+    def test_create_route(self):
+        source, destination = sample_airports()
+        payload = {
+            "source": source.id,
+            "destination": destination.id,
+            "distance": 400,
+        }
+        res = self.client.post(path=ROUTE_URL, data=payload)
+        route = Route.objects.get(id=res.data["id"])
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(route.source.id, payload["source"])
+        self.assertEqual(route.destination.id, payload["destination"])
+        self.assertEqual(route.distance, payload["distance"])
+
+    def test_create_route_already_exist(self):
+        source, destination = sample_airports()
+        payload = {
+            "source": source.id,
+            "destination": destination.id,
+            "distance": 400,
+        }
+        res = self.client.post(path=ROUTE_URL, data=payload)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        res = self.client.post(path=ROUTE_URL, data=payload)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            res.data["non_field_errors"][0].title(),
+            "The Fields Source, Destination Must Make A Unique Set."
+        )
+        self.assertEqual(
+            res.data["non_field_errors"][0].code,
+            "unique"
+        )
+
+    def test_create_route_destination_adn_source_equal(self):
+        source, destination = sample_airports()
+        payload = {
+                    "source": source.id,
+                    "destination": source.id,
+                    "distance": 400,
+        }
+        res = self.client.post(path=ROUTE_URL, data=payload)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            res.data["non_field_errors"][0].title(),
+            "The destination and source are equal."
+        )
+        self.assertEqual(
+            res.data["non_field_errors"][0].code,
+            "invalid"
+        )
