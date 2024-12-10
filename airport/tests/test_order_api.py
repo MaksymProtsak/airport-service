@@ -7,6 +7,7 @@ from rest_framework import status
 
 from airport.models import Order
 from airport.serializers import OrderSerializer
+from airport.tests.test_flight_api import sample_flight
 
 ORDER_URL = reverse("airport:order-list")
 
@@ -70,11 +71,30 @@ class AdminOrderTests(TestCase):
         self.client.force_authenticate(self.user)
 
     def test_create_order_bad_request(self):
+        sample_flight()
         payload = {
-            "user": self.user,
-            "created_at": '2024-12-06T17:49:15.578812Z',
+            "tickets": [
+                {
+                    "row": 1,
+                    "seat": 1,
+                    "flight": 1
+                }
+            ]
         }
-        res = self.client.post(path=ORDER_URL, data=payload)
+        res = self.client.post(path=ORDER_URL, data=payload,)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(list(res.data.keys()), ["tickets"])
 
+    def test_create_order(self):
+        sample_flight()
+        payload = {
+            "tickets": [
+                {
+                    "row": 1,
+                    "seat": 1,
+                    "flight": 1
+                }
+            ]
+        }
+        res = self.client.post(path=ORDER_URL, data=payload, format="json")
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
